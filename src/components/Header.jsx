@@ -2,20 +2,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { IoSearchOutline } from "react-icons/io5";
-import { TiHomeOutline } from "react-icons/ti";
-import { BsCameraReels } from "react-icons/bs";
-import { RiTimeLine } from "react-icons/ri";
-import { IoPersonSharp } from "react-icons/io5";
-import { signIn, signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { IoMdAddCircleOutline } from "react-icons/io";
 
-
-
-
+// import { TiHomeOutline } from "react-icons/ti";
+// import { BsCameraReels } from "react-icons/bs";
+// import { RiTimeLine } from "react-icons/ri";
+// import { IoPersonSharp } from "react-icons/io5";
+import { signIn, useSession, signOut } from "next-auth/react";
+import Modal from "react-modal";
+import { useState } from "react";
 
 
 export default function Header() {
     const {data: session} = useSession();
+    const [isOpen, setIsOpen] = useState(false)
    // console.log(session);
   return (
     <div className="sticky top-0 w-full bg-transparent sm:bg-purple-600 py-5 shadow-sm z-30 border-b sm:border-b-0">
@@ -48,14 +48,16 @@ export default function Header() {
             </div>
              {/* menu */}
              {session ? (
+                <>
+                <IoMdAddCircleOutline className="text-2xl text-white cursor-pointer transform hover:scale-125 transition-transform mr-2 duration-300 hover:text-violet-300" onClick={()=> setIsOpen(true)}/>
                 <Image
                 src={session.user.image} alt=""
                 width={50}
                 height={50}
                 className="rounded-full border border-lime-100 cursor-pointer"
                 onClick={signOut}
-                />
-
+                />  
+                </>
                 
               
              ) : (
@@ -65,12 +67,15 @@ export default function Header() {
              
             
           </div>
-
-            
-
-
-
         </div>
+        {isOpen && (
+            <Modal isOpen={isOpen} className="max-w-lg w-[90%] p-6 absolute top-56 left-[50%] translate-x-[-50%] bg-white border-2 rounded-md shadow-md" onReuestClose={()=>setIsOpen(false)}>
+                <div>
+                    <h1>Modal</h1>
+                    <button onClick={() => setIsOpen(false)}>Close</button>
+                </div>
+            </Modal>
+        )}
     </div>
   )
 }
