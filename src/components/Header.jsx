@@ -14,15 +14,20 @@ import Modal from "react-modal";
 import { useEffect, useRef, useState } from "react";
 import { app } from "@/firebase";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import {addDoc, collection, getFirestore, serverTimestamp} from 'firebase/firestore'
 
 
 export default function Header() {
     const {data: session} = useSession();
+    console.log(session);
     const [isOpen, setIsOpen] = useState(false)
     const [selectedFile, setSelectedFile] = useState(null);
     const [imageFileUrl, setImageFileUrl] = useState(null)
     const [imageFileUploading, setImageFileUploading] = useState(false)
+    const [postUploading, setPostUploading] = useState(false)
+    const [caption, setCaption] = useState('')
     const filePickerRef = useRef(null)
+    const db = getFirestore(app)
     function addImageToPost(e) {
         const file = e.target.files[0]
         if(file){
@@ -66,6 +71,18 @@ export default function Header() {
         )
 
     }
+    async function handleSubmit(){
+        setPostUploading(true);
+        const docRef = await addDoc(collection(db, 'posts'), {
+            usernsme: session.user.username,
+            caption,
+            profileImg: session.user,image,
+            image: imageFileUrl,
+            timestamp: serverTimestamp()
+        });
+        setPostUploading(false);
+        setIsOpen(false);
+    }
    // console.log(session);
   return (
     <div className="sticky top-0 w-full bg-transparent sm:bg-purple-600 py-5 shadow-sm z-30 border-b sm:border-b-0">
@@ -93,7 +110,12 @@ export default function Header() {
           <div className="flex items-center">
              {/* search */}
              <div className="relative flex items-center w-[250px] mr-3">
-                <input type="text" className="rounded-xl pl-2 hover:outline-none focus:outline-none h-10 text-sm w-full max-w-[250px] border border-purple-500 border-opacity-30" placeholder="Search here..."  />
+                <input 
+                    type="text" 
+                    className="rounded-xl pl-2 hover:outline-none focus:outline-none h-10 text-sm w-full max-w-[250px] border border-purple-500 border-opacity-30" 
+                    placeholder="Search here..."
+                    onChange={(e)=>setCaption(e.target.value)}
+                />
                 <IoSearchOutline className="absolute right-2 bg-purple-500 bg-opacity-50 text-white w-[27px] h-[27px] rounded-full p-1" />
             </div>
              {/* menu */}
@@ -111,7 +133,11 @@ export default function Header() {
                 
               
              ) : (
-                <button className="flex gap-4 ml-auto text-purple-500 sm:text-white  items-center" onClick={signIn}>Login</button>
+                <button 
+                    className="flex gap-4 ml-auto text-purple-500 sm:text-white  items-center" 
+                    onClick={signIn}
+                >
+                        Login</button>
              )}
                
              
@@ -143,7 +169,13 @@ export default function Header() {
                     placeholder="Please enter your caption..."
                     className="m-4 border-none text-center w-full focus:ring-0 outline-none"
                     />
-                    <button disabled className="w-full bg-purple-600 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:brightness-100">
+                    <button 
+                        onClick={handleSubmit} 
+                        disabled = {
+                            !selectedFile || caption.trim() === '' || postUploading || imageFileUploading
+                        }
+                        className="w-full bg-purple-600 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                    >
                         Upload Post
                     </button>
                     <AiOutlineClose 
