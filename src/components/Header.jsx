@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { IoSearchOutline } from "react-icons/io5";
 import { IoMdAddCircleOutline } from "react-icons/io";
-
+import { HiCamera } from "react-icons/hi"
+import { AiOutlineClose } from "react-icons/ai"
 // import { TiHomeOutline } from "react-icons/ti";
 // import { BsCameraReels } from "react-icons/bs";
 // import { RiTimeLine } from "react-icons/ri";
@@ -69,11 +70,26 @@ export default function Header() {
           </div>
         </div>
         {isOpen && (
-            <Modal isOpen={isOpen} className="max-w-lg w-[90%] p-6 absolute top-56 left-[50%] translate-x-[-50%] bg-white border-2 rounded-md shadow-md" onReuestClose={()=>setIsOpen(false)}>
-                <div>
-                    <h1>Modal</h1>
-                    <button onClick={() => setIsOpen(false)}>Close</button>
+            <Modal 
+            isOpen={isOpen} 
+            className="max-w-lg w-[90%] p-6 absolute top-56 left-[50%] translate-x-[-50%] bg-white border-2 rounded-md shadow-md" 
+            onRequestClose={()=>setIsOpen(false)}
+            ariaHideApp={false}
+            >
+                <div className="flex flex-col items-center justify-center h-[100%]">
+                   <HiCamera className="text-5xl text-gray-500 cursor-pointer hover:text-purple-500" />
                 </div>
+                <input 
+                    type="text "
+                    placeholder="Please enter your caption..."
+                    className="m-4 border-none text-center w-full focus:ring-0 outline-none"
+                    />
+                    <button disabled className="w-full bg-purple-600 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:brightness-100">
+                        Upload Post
+                    </button>
+                    <AiOutlineClose 
+                        className="cursor-pointer absolute top-2 right-2 hover:text-purple-600 transition duration-300" 
+                        onClick={()=>setIsOpen(false)} />
             </Modal>
         )}
     </div>
