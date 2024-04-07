@@ -1,6 +1,9 @@
 "use client"
 import Image from "next/image";
 import Link from "next/link";
+import { signIn, useSession, signOut } from "next-auth/react";
+import Modal from "react-modal";
+import { useEffect, useRef, useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { HiCamera } from "react-icons/hi"
@@ -9,17 +12,14 @@ import { AiOutlineClose } from "react-icons/ai"
 // import { BsCameraReels } from "react-icons/bs";
 // import { RiTimeLine } from "react-icons/ri";
 // import { IoPersonSharp } from "react-icons/io5";
-import { signIn, useSession, signOut } from "next-auth/react";
-import Modal from "react-modal";
-import { useEffect, useRef, useState } from "react";
 import { app } from "@/firebase";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import {addDoc, collection, getFirestore, serverTimestamp} from 'firebase/firestore'
+import {addDoc, collection, getFirestore, serverTimestamp} from 'firebase/firestore';
 
 
 export default function Header() {
     const {data: session} = useSession();
-    console.log(session);
+  //  console.log(session);
     const [isOpen, setIsOpen] = useState(false)
     const [selectedFile, setSelectedFile] = useState(null);
     const [imageFileUrl, setImageFileUrl] = useState(null)
@@ -43,9 +43,9 @@ export default function Header() {
     },[selectedFile])
 
     async function uploadImageToStorage(){
-        setImageFileUploading(true)
-        const storage = getStorage(app)
-        const fileName = new Date().getTime() + '_' + selectedFile.name;
+        setImageFileUploading(true);
+        const storage = getStorage(app);
+        const fileName = new Date().getTime() + '-' + selectedFile.name;
         const storageRef = ref(storage, fileName);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
         uploadTask.on(
@@ -53,7 +53,7 @@ export default function Header() {
             (snapshot)=>{
                 const progress = 
                 (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('upload is' + progress + '% done');
+                console.log('upload is ' + progress + '% done');
             }, 
             (error) => {
                 console.error(error);
@@ -62,13 +62,12 @@ export default function Header() {
                 setSelectedFile(null)
             }, 
             ()=>{
-                getDownloadURL(uploadTask.snapshot.ref).then
-                ((downloadURL)=>{
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL)=>{
                     setImageFileUrl(downloadURL)
                     setImageFileUploading(false)
-                })
+                });
             }
-        )
+        );
 
     }
     async function handleSubmit(){
@@ -76,12 +75,13 @@ export default function Header() {
         const docRef = await addDoc(collection(db, 'posts'), {
             usernsme: session.user.username,
             caption,
-            profileImg: session.user,image,
+            profileImg: session.user.image,
             image: imageFileUrl,
             timestamp: serverTimestamp()
         });
         setPostUploading(false);
         setIsOpen(false);
+        location.reload();
     }
    // console.log(session);
   return (
@@ -114,7 +114,7 @@ export default function Header() {
                     type="text" 
                     className="rounded-xl pl-2 hover:outline-none focus:outline-none h-10 text-sm w-full max-w-[250px] border border-purple-500 border-opacity-30" 
                     placeholder="Search here..."
-                    onChange={(e)=>setCaption(e.target.value)}
+                    
                 />
                 <IoSearchOutline className="absolute right-2 bg-purple-500 bg-opacity-50 text-white w-[27px] h-[27px] rounded-full p-1" />
             </div>
@@ -154,20 +154,31 @@ export default function Header() {
                 <div className="flex flex-col items-center justify-center h-[100%]">
                     {selectedFile ? (
                         <img 
+                        onClick={()=>setSelectedFile(null)} 
                         src={imageFileUrl} 
                         alt="Selected file" 
                         className={`w-full max-h-[250px] object-cover cursor-pointer ${imageFileUploading ? 'animate-pulse' : ''}`} 
-                        onClick={()=>setSelectedFile(null)} />
+                        />
                     ) : (
-                        <HiCamera className="text-5xl text-gray-500 cursor-pointer hover:text-purple-500" onClick={()=>filePickerRef.current.click()} />
+                        <HiCamera 
+                        onClick={()=>filePickerRef.current.click()} 
+                        className="text-5xl text-gray-500 cursor-pointer hover:text-purple-500" 
+                        />
                     )}
-                   
-                   <input type="file" accept="image/*" onChange={addImageToPost} className="hidden" ref={filePickerRef} />
+                      <input
+              hidden
+              ref={filePickerRef}
+              type='file'
+              accept='image/*'
+              onChange={addImageToPost}
+            />
                 </div>
                 <input 
                     type="text "
+                    maxLength='150'
                     placeholder="Please enter your caption..."
                     className="m-4 border-none text-center w-full focus:ring-0 outline-none"
+                    onChange={(e)=>setCaption(e.target.value)} 
                     />
                     <button 
                         onClick={handleSubmit} 
