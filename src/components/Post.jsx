@@ -1,4 +1,5 @@
 import { HiOutlineDotsVertical } from "react-icons/hi"
+import LikeSection from "./LikeSection"
 export default function Post({post}) {
   return (
     <div className="bg-white my-7 border rounded-md">
@@ -8,8 +9,8 @@ export default function Post({post}) {
             <HiOutlineDotsVertical className="h-5 cursor-pointer" />
         </div>
             <img src={post.image} alt={post.caption} className="object-cover w-full" />
-           
-            <p className="p-5 truncate"><span>{post.usernsme}</span>
+           <LikeSection id={post.id} />
+            <p className="p-5 truncate lex flex-col"><span className="flex font-bold">{post.usernsme}</span>
             {post.caption}</p>
         
         
